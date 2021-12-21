@@ -1,0 +1,6 @@
+__pycache__/
+yolo-coco/yolov3.weights
+yolo-coco/yolov3.cfg
+yolo-coco/coco.names
+capture*.jpg
+*.sqlite

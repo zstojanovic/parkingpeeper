@@ -1,0 +1,152 @@
+<html>
+  <head>
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">    
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type="text/css">
+      * {
+        box-sizing: border-box;
+      }
+      html {
+        height: 100%;
+      }
+      body {
+        height: 100%;
+        margin: 0;
+        color: #F0F0F0;
+        background-color: #212121;
+        font-family: sans-serif;
+      }
+      div {
+        text-align: center;
+      }
+      #main {
+        background-color: #313131;
+        margin: 0 auto;
+      }
+      #image {
+          width: 100%;
+      }
+      #logo {
+        width: 20%;
+        height: 10%;
+        float: left;
+        text-align: left;
+        padding: 5px;
+      }
+      #title {
+        width: 80%;
+        height: 10%;
+        float: left;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;        
+      }
+      #status {
+        width: 100%;
+        height: 5%;
+        float: left;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;        
+      }
+      #timestamp {
+        width: 50%;
+        float: left;
+        text-align: left;
+        padding: 5px;
+      }
+      #count {
+        width: 50%;
+        float: left;
+        text-align: right;
+        padding: 5px;
+      }      
+      .green {
+        background-color: #317031;
+      }
+      .yellow {
+        background-color: #B0B031;
+      }
+      .red {
+        background-color: #A03131;
+      }
+    </style>
+  </head>
+<body>
+  <div id="main">
+    <div id="logo">
+       <img src="images/parkingpeeper.png" style="height: 100%;">
+    </div>
+    <div id="title"><h2>Parking Peeper says:</h2></div>
+    <div id="status">Please wait</div>
+    <img id="image" src="images/parkingpeeper.png"/>
+    <div id="timestamp">2021-120-21 10:43:23</div>
+    <div id="count">18 cars</div>
+  </div>
+
+  <script type="text/javascript">
+
+    mainElement = document.getElementById("main");
+    statusElement = document.getElementById("status");
+    imageElement = document.getElementById("image");
+    timestampElement = document.getElementById("timestamp");
+    countElement = document.getElementById("count");
+
+    function ready(fn) {
+        if (document.readyState != 'loading'){
+            fn();
+        } else {
+            document.addEventListener('DOMContentLoaded', fn);
+        }
+    }
+
+    function bla() {
+        var width = document.documentElement.clientWidth;
+        var height = document.documentElement.clientHeight;
+        if (width > height) {
+            mainElement.style.height = height + "px";
+            mainElement.style.width = (height * 0.55) + "px";
+        } else {
+            mainElement.style.height = height + "px";
+            mainElement.style.width = width + "px";
+        }
+    }
+
+    ready(function() {
+        bla();
+        window.addEventListener('resize', bla, true);
+    });
+   
+    setInterval(function(){
+      var request = new XMLHttpRequest();
+      request.open('GET', 'current', true);
+
+      request.onload = function() {
+        if (this.status >= 200 && this.status < 400) {
+          // Success!
+          var data = JSON.parse(this.response);
+
+          imageElement.setAttribute("src", "images/" + data.imageFile);
+
+          statusElement.setAttribute("class", data.status);
+          statusElement.innerHTML = "<h4>" + data.message + "</h4>";
+          timestampElement.innerHTML = data.timestamp;
+          countElement.innerHTML = data.carCount + " cars spotted";
+          console.log(data);
+        } else {
+          console.log(`[error] We reached server, but it returned an error`);
+        }
+      };
+
+      request.onerror = function() {
+        console.log(`[error] There was a connection error of some sort`);
+      };
+
+      request.send();
+
+    }, 1000);
+  </script>
+</body>
+</html>
