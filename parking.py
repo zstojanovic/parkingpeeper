@@ -36,7 +36,6 @@ async def backgroundTask(app):
             end = time.time()
             log("YOLO took {:.6f} seconds".format(end - start))
 
-
             await app["db"].execute('INSERT INTO parkingstate (imagefile, carcount) values (?, ?);', (filename, carCount))
             await app["db"].commit()
             #await asyncio.sleep(10)
@@ -60,6 +59,15 @@ async def index(request):
 async def getCurrentData(request):
     cursor = await request.app["db"].execute("SELECT datetime(timestamp, 'localtime'), imagefile, carcount FROM parkingstate ORDER BY timestamp DESC LIMIT 1;")
     row = await cursor.fetchone()
+    if (row == None):
+        return web.json_response({
+            "timestamp": "",
+            "imageFile": "parkingpeeper.png",
+            "carCount": 0,
+            "total": "",
+            "status": "yellow",
+            "message": "Please wait..." })
+
     carCount = row[2]
     availableSpots = request.app["total"] - carCount
     status = ""
@@ -74,9 +82,13 @@ async def getCurrentData(request):
         status = "green"
         message = "There's an empty spot!"
 
-    data = { "timestamp": row[0], "imageFile": row[1], "carCount": carCount, "total": request.app["total"], "status": status, "message": message }
-
-    return web.json_response(data)
+    return web.json_response({
+        "timestamp": row[0],
+        "imageFile": row[1],
+        "carCount": carCount,
+        "total": request.app["total"],
+        "status": status,
+        "message": message })
 
 def log(message):
     t = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
